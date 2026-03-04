@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Генератор описаний</title>
-  <meta name="description" content="Красивый генератор описаний товаров (смартфоны и кроссовки) с историей." />
+  <meta name="description" content="Генератор описаний товаров." />
 
   <style>
     :root{
@@ -27,7 +27,6 @@
       color: var(--text);
     }
 
-    /* Background */
     body{
       margin:0;
       min-height:100vh;
@@ -39,7 +38,6 @@
       overflow-x:hidden;
     }
 
-    /* Animated gradient glow */
     .glow{
       position:fixed;
       inset:-20%;
@@ -56,7 +54,6 @@
       100%{ transform: translate3d(2%, 2%, 0) scale(1.08); }
     }
 
-    /* Layout */
     .wrap{
       max-width: 1120px;
       margin: 0 auto;
@@ -110,11 +107,6 @@
       font-size: 20px;
       letter-spacing: .2px;
       line-height:1.1;
-    }
-    .titleBlock p{
-      margin:6px 0 0;
-      color: var(--muted);
-      font-size: 13px;
     }
 
     .pill{
@@ -337,7 +329,6 @@
       min-height: 80px;
     }
 
-    /* Skeleton shimmer */
     .shimmer{
       position:absolute;
       inset:0;
@@ -352,7 +343,6 @@
       100%{ transform: translateX(100%); }
     }
 
-    /* History list */
     .history{
       margin-top: 12px;
       display:flex;
@@ -414,7 +404,6 @@
       overflow:hidden;
     }
 
-    /* Toast */
     .toast{
       position: fixed;
       right: 18px;
@@ -434,15 +423,6 @@
     .toast.show{ opacity:1; transform: translateY(0); }
     .toast .tTitle{ font-weight: 900; font-size: 13px; margin-bottom: 4px; }
     .toast .tText{ font-size: 12px; color: var(--muted); line-height: 1.35; }
-
-    .footerNote{
-      margin-top: 14px;
-      color: var(--muted2);
-      font-size: 12px;
-      position:relative;
-    }
-    a{ color: rgba(167,139,250,.95); text-decoration: none; }
-    a:hover{ text-decoration: underline; }
   </style>
 </head>
 
@@ -460,7 +440,6 @@
         </div>
         <div class="titleBlock">
           <h1>Генератор описаний</h1>
-          <p>Красивый интерфейс + анимации • работает через API и сохраняет историю</p>
         </div>
       </div>
 
@@ -474,12 +453,11 @@
     </header>
 
     <div class="grid">
-      <!-- LEFT: generator -->
       <section class="card">
         <div class="cardHead">
           <div>
-            <h2>Параметры товара</h2>
-            <div class="sub">Заполни характеристики → нажми “Сгенерировать”.</div>
+            <h2>Параметры</h2>
+            <div class="sub">Заполни поля и нажми “Сгенерировать”.</div>
           </div>
 
           <div class="tabs" role="tablist">
@@ -524,28 +502,23 @@
 
           <div class="status" id="status"></div>
         </div>
-
-        <div class="footerNote">
-          Подсказка: история берётся с <code>/api/history</code>, генерация — <code>/api/generate</code>.
-        </div>
       </section>
 
-      <!-- RIGHT: output + history -->
       <section class="card">
         <div class="cardHead">
           <div>
             <h2>Результат</h2>
-            <div class="sub">Текст появляется здесь + можно открыть историю.</div>
+            <div class="sub">Текст и история.</div>
           </div>
         </div>
 
         <div class="outputBox">
           <div class="shimmer" id="shimmer"></div>
           <div class="outputTitle">
-            <span id="outTitle">Готово к генерации</span>
+            <span id="outTitle">Готово</span>
             <span class="badge" id="outBadge">—</span>
           </div>
-          <div class="outputText" id="outText">Нажми “Сгенерировать”, чтобы получить описание.</div>
+          <div class="outputText" id="outText">Нажми “Сгенерировать”.</div>
         </div>
 
         <div class="history">
@@ -569,7 +542,6 @@
   </div>
 
 <script>
-  // ---------- UI helpers ----------
   const $ = (id) => document.getElementById(id);
   function toast(title, text){
     $("toastTitle").textContent = title;
@@ -591,27 +563,26 @@
     else { b.classList.add("active"); a.classList.remove("active"); }
   }
 
-  // ---------- Form schema ----------
   const SCHEMA = {
     smartphone: [
-      {k:"brand", label:"Бренд", type:"text", ph:"например Samsung"},
-      {k:"model", label:"Модель", type:"text", ph:"например Galaxy A55"},
+      {k:"brand", label:"Бренд", type:"text", ph:"Samsung"},
+      {k:"model", label:"Модель", type:"text", ph:"Galaxy A55"},
       {k:"screen_size_in", label:"Экран (дюймы)", type:"number", step:"0.1", ph:"6.5"},
       {k:"ram_gb", label:"RAM (ГБ)", type:"select", options:["4","6","8","12","16"]},
       {k:"storage_gb", label:"Память (ГБ)", type:"select", options:["64","128","256","512","1024"]},
       {k:"battery_mah", label:"Батарея (мА·ч)", type:"number", step:"1", ph:"5000"},
       {k:"camera_mp", label:"Камера (Мп)", type:"number", step:"1", ph:"50"},
-      {k:"key_feature", label:"Особенность", type:"text", ph:"например NFC, быстрая зарядка"}
+      {k:"key_feature", label:"Особенность", type:"text", ph:"NFC, быстрая зарядка"}
     ],
     sneakers: [
-      {k:"brand", label:"Бренд", type:"text", ph:"например Nike"},
+      {k:"brand", label:"Бренд", type:"text", ph:"Nike"},
       {k:"model", label:"Модель", type:"text", ph:"Air Zoom"},
       {k:"purpose", label:"Назначение", type:"select", options:["города","бега","тренировок","повседневной носки","спорта"]},
       {k:"size_eu", label:"Размер EU", type:"number", step:"1", ph:"42"},
-      {k:"material_upper", label:"Материал верха", type:"text", ph:"например сетка/кожа"},
+      {k:"material_upper", label:"Материал верха", type:"text", ph:"сетка/кожа"},
       {k:"season", label:"Сезон", type:"select", options:["лето","демисезон","зима","всесезон"]},
       {k:"color", label:"Цвет", type:"select", options:["черный","белый","серый","синий","бежевый","красный"]},
-      {k:"key_feature", label:"Особенность", type:"text", ph:"например амортизация, лёгкие"}
+      {k:"key_feature", label:"Особенность", type:"text", ph:"амортизация, лёгкие"}
     ],
   };
 
@@ -622,7 +593,6 @@
     wrap.innerHTML = "";
     const list = SCHEMA[cat] || [];
 
-    // делаем аккуратную сетку 2 колонки
     for(let i=0;i<list.length;i+=2){
       const row = document.createElement("div");
       row.className = "row";
@@ -684,7 +654,7 @@
     $("sp").style.display = on ? "inline-block" : "none";
     $("btnGen").disabled = on;
     $("shimmer").style.display = on ? "block" : "none";
-    if(on) setStatus("Генерируем…", true);
+    if(on) setStatus("Генерация…", true);
   }
 
   async function ping(){
@@ -694,7 +664,7 @@
       $("pingText").textContent = j?.message ? j.message : "ok";
       $("dot").style.background = "var(--accent2)";
     }catch(e){
-      $("pingText").textContent = "сервер спит/недоступен";
+      $("pingText").textContent = "offline";
       $("dot").style.background = "var(--danger)";
     }
   }
@@ -710,19 +680,18 @@
       });
       const j = await r.json();
       if(!j.success){
-        setStatus(j.error || "Ошибка генерации", false);
-        toast("Ошибка", j.error || "Не получилось сгенерировать");
+        setStatus(j.error || "Ошибка", false);
+        toast("Ошибка", j.error || "Не получилось");
         return;
       }
       const item = j.results?.[0];
       const desc = item?.description || "—";
-      setOutput("Описание готово", payload.category, desc);
-      setStatus("Готово ✅", true);
-      toast("Готово", "Описание сгенерировано и сохранено в историю.");
+      setOutput("Готово", payload.category, desc);
+      setStatus("OK", true);
       await loadHistory();
     }catch(e){
       setStatus("Ошибка: " + (e?.message || e), false);
-      toast("Ошибка", "Проверь, что сервер доступен. На Free Render может просыпаться.");
+      toast("Ошибка", "Сервер может спать (free).");
     }finally{
       setLoading(false);
     }
@@ -735,18 +704,18 @@
     if(filter) qs.set("category", filter);
 
     const list = $("hList");
-    list.innerHTML = `<div class="badge">загружаю…</div>`;
+    list.innerHTML = `<div class="badge">…</div>`;
 
     try{
       const r = await fetch("/api/history?" + qs.toString());
       const j = await r.json();
       if(!j.success){
-        list.innerHTML = `<div class="badge">ошибка истории</div>`;
+        list.innerHTML = `<div class="badge">ошибка</div>`;
         return;
       }
       const items = j.history || [];
       if(items.length === 0){
-        list.innerHTML = `<div class="badge">пока пусто</div>`;
+        list.innerHTML = `<div class="badge">пусто</div>`;
         return;
       }
 
@@ -768,40 +737,38 @@
         div.querySelector(".hText").textContent = text;
 
         div.addEventListener("click", ()=>{
-          setOutput("Из истории", cat, text);
-          toast("История", "Открыто сохранённое описание.");
+          setOutput("История", cat, text);
         });
 
         list.appendChild(div);
       });
     }catch(e){
-      list.innerHTML = `<div class="badge">сервер спит/ошибка</div>`;
+      list.innerHTML = `<div class="badge">offline</div>`;
     }
   }
 
   function copyResult(){
     const text = $("outText").textContent || "";
     if(!text.trim()){
-      toast("Копирование", "Нет текста для копирования.");
+      toast("Копирование", "Нечего копировать.");
       return;
     }
     if(navigator.clipboard?.writeText){
       navigator.clipboard.writeText(text).then(()=>{
-        toast("Скопировано", "Текст в буфере обмена.");
+        toast("OK", "Скопировано.");
       });
     } else {
-      toast("Не вышло", "Clipboard API недоступен в этом браузере.");
+      toast("Ошибка", "Clipboard недоступен.");
     }
   }
 
   function clearForm(){
     document.querySelectorAll("[data-key]").forEach(el=> el.value = "");
     $("seed").value = "";
-    setOutput("Готово к генерации", "—", "Нажми “Сгенерировать”, чтобы получить описание.");
+    setOutput("Готово", "—", "Нажми “Сгенерировать”.");
     setStatus("", true);
   }
 
-  // Tabs
   $("tabSmartphone").addEventListener("click", ()=>{
     CURRENT_CAT = "smartphone";
     setActiveTab(CURRENT_CAT);
@@ -815,13 +782,11 @@
     loadHistory();
   });
 
-  // Buttons
   $("btnGen").addEventListener("click", generate);
   $("btnCopy").addEventListener("click", copyResult);
   $("btnClear").addEventListener("click", clearForm);
   $("historyFilter").addEventListener("change", loadHistory);
 
-  // Init
   setActiveTab(CURRENT_CAT);
   renderFields(CURRENT_CAT);
   ping();
