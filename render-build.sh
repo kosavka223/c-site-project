@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ZIP_NAME="project.zip"   # <-- поменяй на gen.zip если переименовал
+ZIP_NAME="gen.zip"   # <-- поменяй на gen.zip если переименовал
 
 echo "==> Extract $ZIP_NAME to ./appsrc"
 rm -rf appsrc
