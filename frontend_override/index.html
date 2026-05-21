@@ -7,6 +7,11 @@
   <meta name="description" content="Генератор описаний товаров." />
 
   <style>
+    /*
+      Глобальные CSS-переменные.
+      Они позволяют централизованно управлять цветами, радиусами,
+      тенями и другими повторяющимися значениями интерфейса.
+    */
     :root{
       --bg0:#060812;
       --bg1:#0b1024;
@@ -28,6 +33,7 @@
       color-scheme: dark;
     }
 
+    /* Базовая настройка страницы и фон с несколькими декоративными градиентами. */
     body{
       margin:0;
       min-height:100vh;
@@ -39,6 +45,7 @@
       overflow-x:hidden;
     }
 
+    /* Декоративное размытое свечение на фоне страницы. */
     .glow{
       position:fixed;
       inset:-20%;
@@ -56,6 +63,7 @@
       100%{ transform: translate3d(2%, 2%, 0) scale(1.08); }
     }
 
+    /* Основной контейнер страницы. */
     .wrap{
       max-width: 1120px;
       margin: 0 auto;
@@ -68,6 +76,7 @@
       to{ opacity:1; transform: translateY(0); }
     }
 
+    /* Верхняя панель: название приложения и статус сервера. */
     header{
       display:flex;
       align-items:center;
@@ -123,6 +132,7 @@
       line-height:1.1;
     }
 
+    /* Индикатор состояния сервера в правой части header. */
     .pill{
       display:flex;
       gap:10px;
@@ -152,6 +162,7 @@
       50%{ transform: scale(1.15); opacity: .75; }
     }
 
+    /* Две основные колонки: форма параметров и блок результата. */
     .grid{
       display:grid;
       grid-template-columns: 1.05fr .95fr;
@@ -164,6 +175,7 @@
       }
     }
 
+    /* Универсальная карточка интерфейса. */
     .card{
       background: var(--card);
       border: 1px solid var(--stroke);
@@ -206,6 +218,7 @@
       color: var(--muted);
     }
 
+    /* Вкладки выбора категории товара. */
     .tabs{
       display:grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -243,6 +256,7 @@
       flex-shrink:0;
     }
 
+    /* Активная вкладка визуально выделяется градиентом. */
     .tab.active{
       background: linear-gradient(135deg, rgba(124,58,237,.95), rgba(99,102,241,.65));
       color: white;
@@ -292,6 +306,7 @@
       margin: 0 0 6px;
     }
 
+    /* Единый стиль для всех полей ввода. */
     input,
     select,
     textarea{
@@ -311,6 +326,7 @@
       opacity: .82;
     }
 
+    /* Кастомизация select, чтобы выпадающие списки подходили под общий стиль. */
     select{
       appearance:none;
       -webkit-appearance:none;
@@ -339,6 +355,7 @@
       color: #ffffff;
     }
 
+    /* Подсветка активного поля при фокусе. */
     input:focus,
     select:focus,
     textarea:focus{
@@ -400,6 +417,7 @@
       color: rgba(255,255,255,.9);
     }
 
+    /* Спиннер показывается во время запроса генерации. */
     .spinner{
       width:16px;
       height:16px;
@@ -462,6 +480,7 @@
       display:block;
     }
 
+    /* Анимация поверх блока результата во время загрузки. */
     .shimmer{
       position:absolute;
       inset:0;
@@ -564,6 +583,7 @@
       overflow:hidden;
     }
 
+    /* Toast — небольшое всплывающее уведомление в правом нижнем углу. */
     .toast{
       position: fixed;
       right: 18px;
@@ -601,6 +621,7 @@
 </head>
 
 <body>
+  <!-- Декоративный фоновый слой. Он не участвует в логике приложения. -->
   <div class="glow"></div>
 
   <div class="wrap">
@@ -617,6 +638,7 @@
         </div>
       </div>
 
+      <!-- Блок статуса сервера. Текст и цвет точки обновляются функцией ping(). -->
       <div class="pill" title="Статус сервера">
         <span class="dot" id="dot"></span>
         <div>
@@ -634,6 +656,10 @@
             <div class="sub">Заполни поля и нажми “Сгенерировать”.</div>
           </div>
 
+          <!--
+            Вкладки категорий.
+            data-cat хранит техническое имя категории, которое используется в JavaScript.
+          -->
           <div class="tabs" role="tablist">
             <button class="tab active" id="tabSmartphone" type="button" data-cat="smartphone">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -675,6 +701,7 @@
             </div>
           </div>
 
+          <!-- Поля формы добавляются динамически функцией renderFields(). -->
           <div id="fields"></div>
 
           <div class="btnRow">
@@ -721,20 +748,31 @@
             </select>
           </div>
 
+          <!-- Список истории заполняется функцией loadHistory(). -->
           <div class="hList" id="hList"></div>
         </div>
       </section>
     </div>
   </div>
 
+  <!-- Компонент всплывающих уведомлений. -->
   <div class="toast" id="toast">
     <div class="tTitle" id="toastTitle">Сообщение</div>
     <div class="tText" id="toastText"></div>
   </div>
 
   <script>
+    /*
+      Короткая функция для получения элементов по id.
+      Позволяет писать $("status") вместо document.getElementById("status").
+    */
     const $ = (id) => document.getElementById(id);
 
+    /**
+     * Показывает всплывающее уведомление в правом нижнем углу.
+     * @param {string} title - Заголовок уведомления.
+     * @param {string} text - Текст уведомления.
+     */
     function toast(title, text){
       $("toastTitle").textContent = title;
       $("toastText").textContent = text;
@@ -742,17 +780,36 @@
       setTimeout(() => $("toast").classList.remove("show"), 2600);
     }
 
+    /**
+     * Обновляет текстовый статус под кнопками формы.
+     * @param {string} msg - Сообщение статуса.
+     * @param {boolean} ok - true для успешного статуса, false для ошибки.
+     */
     function setStatus(msg, ok=true){
       const el = $("status");
       el.textContent = msg || "";
       el.className = "status " + (ok ? "ok" : "err");
     }
 
+    /**
+     * Визуально выделяет активную вкладку категории.
+     * @param {string} cat - Техническое имя категории.
+     */
     function setActiveTab(cat){
       const tabs = [$("tabSmartphone"), $("tabSneakers"), $("tabGpu")].filter(Boolean);
       tabs.forEach(t => t.classList.toggle("active", t.dataset.cat === cat));
     }
 
+    /*
+      Описание динамических полей формы.
+      Каждая категория содержит список характеристик, которые нужно показать пользователю.
+
+      k       - ключ поля, который будет отправлен на сервер;
+      label   - подпись поля в интерфейсе;
+      type    - тип input или select;
+      ph      - placeholder для input;
+      options - варианты для select.
+    */
     const SCHEMA = {
       smartphone: [
         {k:"brand", label:"Бренд", type:"text", ph:"Samsung"},
@@ -786,14 +843,21 @@
       ],
     };
 
+    /* Текущая выбранная категория. При загрузке страницы выбран смартфон. */
     let CURRENT_CAT = "smartphone";
 
+    /**
+     * Рендерит поля формы для выбранной категории.
+     * Поля создаются динамически на основе объекта SCHEMA.
+     * @param {string} cat - Техническое имя категории.
+     */
     function renderFields(cat){
       const wrap = $("fields");
       wrap.innerHTML = "";
 
       const list = SCHEMA[cat] || [];
 
+      // Поля выводятся по два в строке, чтобы форма выглядела компактнее.
       for(let i = 0; i < list.length; i += 2){
         const row = document.createElement("div");
         row.className = "row";
@@ -812,6 +876,7 @@
           if(field.type === "select"){
             el = document.createElement("select");
 
+            // Пустой вариант нужен, чтобы пользователь мог не заполнять поле.
             const opt0 = document.createElement("option");
             opt0.value = "";
             opt0.textContent = "— выбрать —";
@@ -831,6 +896,7 @@
             if(field.ph) el.placeholder = field.ph;
           }
 
+          // data-key связывает DOM-поле с ключом, который уйдёт в JSON на сервер.
           el.dataset.key = field.k;
 
           box.appendChild(el);
@@ -841,13 +907,19 @@
       }
     }
 
+    /**
+     * Собирает данные из формы в объект для отправки на backend.
+     * @returns {{category: string, attributes: Object, seed?: string}}
+     */
     function getPayload(){
       const attrs = {};
 
+      // Берём только динамические поля, у которых есть data-key.
       document.querySelectorAll("[data-key]").forEach(el => {
         const k = el.dataset.key;
         const v = el.value;
 
+        // Пустые поля не отправляются, чтобы не засорять payload лишними значениями.
         if(v !== "" && v != null){
           attrs[k] = v;
         }
@@ -867,25 +939,34 @@
       return payload;
     }
 
+    /**
+     * Обновляет блок результата.
+     * @param {string} title - Заголовок блока результата.
+     * @param {string} badge - Короткая метка, обычно категория.
+     * @param {string} text - Текст, который нужно показать.
+     * @param {boolean} editable - Можно ли редактировать textarea.
+     */
     function setOutput(title, badge, text, editable = true){
       $("outTitle").textContent = title;
       $("outBadge").textContent = badge;
 
       const out = $("outText");
-
       out.value = text;
-
-      if(editable){
-        out.readOnly = false;
-      } else {
-        out.readOnly = true;
-      }
+      out.readOnly = !editable;
     }
 
+    /**
+     * Возвращает текущий текст из блока результата.
+     * @returns {string}
+     */
     function getOutputText(){
       return $("outText").value || "";
     }
 
+    /**
+     * Включает или выключает визуальный режим загрузки.
+     * @param {boolean} on - true включает загрузку, false выключает.
+     */
     function setLoading(on){
       $("sp").style.display = on ? "inline-block" : "none";
       $("btnGen").disabled = on;
@@ -896,6 +977,10 @@
       }
     }
 
+    /**
+     * Проверяет доступность backend-сервера.
+     * Использует endpoint /ping и обновляет индикатор в header.
+     */
     async function ping(){
       try{
         const r = await fetch("/ping");
@@ -909,6 +994,13 @@
       }
     }
 
+    /**
+     * Главная функция генерации описания.
+     * 1. Собирает данные формы.
+     * 2. Отправляет их на /api/generate.
+     * 3. Получает описание.
+     * 4. Показывает результат и обновляет историю.
+     */
     async function generate(){
       setLoading(true);
 
@@ -931,6 +1023,7 @@
           return;
         }
 
+        // Ожидается, что сервер вернёт массив results, где первый элемент содержит description.
         const item = j.results?.[0];
         const desc = item?.description || "—";
 
@@ -946,6 +1039,10 @@
       }
     }
 
+    /**
+     * Загружает историю генераций с сервера.
+     * Учитывает фильтр категории и показывает последние 20 записей.
+     */
     async function loadHistory(){
       const filter = $("historyFilter").value;
 
@@ -993,6 +1090,10 @@
             <div class="hText"></div>
           `;
 
+          /*
+            Текст истории вставляется через textContent, а не через innerHTML.
+            Это снижает риск выполнения случайного HTML/JS из данных сервера.
+          */
           div.querySelector(".hText").textContent = text;
 
           div.addEventListener("click", () => {
@@ -1007,6 +1108,9 @@
       }
     }
 
+    /**
+     * Копирует текущий текст результата в буфер обмена.
+     */
     function copyResult(){
       const text = getOutputText();
 
@@ -1024,6 +1128,9 @@
       }
     }
 
+    /**
+     * Очищает форму, seed, статус и блок результата.
+     */
     function clearForm(){
       document.querySelectorAll("[data-key]").forEach(el => {
         el.value = "";
@@ -1035,6 +1142,11 @@
       setStatus("", true);
     }
 
+    /**
+     * Переключает категорию товара.
+     * При переключении перерисовываются поля формы и обновляется история.
+     * @param {string} cat - Новая категория.
+     */
     function switchCategory(cat){
       CURRENT_CAT = cat;
 
@@ -1046,6 +1158,10 @@
       setStatus("", true);
     }
 
+    /*
+      Регистрация обработчиков событий.
+      Здесь связываются кнопки интерфейса с функциями приложения.
+    */
     $("tabSmartphone").addEventListener("click", () => switchCategory("smartphone"));
     $("tabSneakers").addEventListener("click", () => switchCategory("sneakers"));
     $("tabGpu").addEventListener("click", () => switchCategory("gpu"));
@@ -1055,6 +1171,10 @@
     $("btnClear").addEventListener("click", clearForm);
     $("historyFilter").addEventListener("change", loadHistory);
 
+    /*
+      Начальная инициализация страницы.
+      Выполняется один раз после загрузки script.
+    */
     setActiveTab(CURRENT_CAT);
     renderFields(CURRENT_CAT);
     setOutput("Готово", "—", "Нажми “Сгенерировать”.", false);
